@@ -1,0 +1,16 @@
+{
+    "extends": "standard",
+    "env": {
+        "amd": true,
+        "browser": true,
+        "commonjs": true,
+        "es6": true,
+        "jquery": true
+    },
+    "rules": {
+        "brace-style": ["error", "stroustrup"],
+        "indent": [1, 4],
+        "semi": ["error", "always"],
+        "space-before-function-paren": ["error", "never"]
+    }
+}
