@@ -1,6 +1,6 @@
 'use strict';
 
-/* global requirejs */
+/* global require */
 
 $(document).ready(function() {
     $('#navbar-side').addClass('reveal');
