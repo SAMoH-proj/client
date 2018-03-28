@@ -48,16 +48,38 @@
         </li>
 
         <li class="navbar-side-item">
-          <a href="#" class="side-link">Panel</a>
+          <!-- <a href="#" class="side-link">Panel</a> -->
         </li>
+
+        <li class="navbar-side-item">
+          <div id="draw-line" class="form-check">
+            <input id="draw-line-chk" type="checkbox" class="form-check-input">
+            <img src="img/vector-path-line.svg"
+                 height="20px"
+                 width="20px"/>
+            <label for="draw-line-chk">Draw Line</label>
+            <div id="draw-line-details">
+              <span id="draw-line-details-text"></span>
+
+              <i class="fas fa-trash"></i>
+            </div>
+          </div>
+        </li>
+
+        <li class="navbar-side-item">
+          <div id="available-tiles" class="form-check">
+          </div>
+
+        </li>
+
       </ul>
     </nav>
 
     <div id="cesiumContainer"></div>
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-            integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"
+            integrity="sha384-xBuQ/xzmlsLoJpyjoggmTEz8OWUFM0/RC5BsqQBDX2v5cMvDHcMakNTNrHIW2I5f"
             crossorigin="anonymous">
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
@@ -66,6 +88,11 @@
     </script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
             integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+            crossorigin="anonymous">
+    </script>
+
+    <script defer src="https://use.fontawesome.com/releases/v5.0.9/js/all.js"
+            integrity="sha384-8iPTk2s/jMVj81dnzb/iFR2sdA7u06vHJyyLlAd4snFpCl/SnyUjRrbdJsw1pGIl"
             crossorigin="anonymous">
     </script>
 

@@ -12,5 +12,5 @@ $(document).ready(function() {
         $('#navbar-side').removeClass('reveal');
     });
 
-    requirejs(['map']);
+    require(['map']);
 });

@@ -16,10 +16,7 @@ html, body, #cesiumContainer {
 }
 
 #side-panel{
-    /* display: block; */
     position: absolute;
-    /* top: 1em; */
-    /* right: 1em; */
     z-index: 2000;
 }
 
@@ -43,15 +40,6 @@ html, body, #cesiumContainer {
     color: white;
     border-color: white;
 }
-
-#navbar-close{
-
-}
-
-/* .navbar-light .navbar-toggler{ */
-/*     color: white; */
-/*     border-color: white; */
-/* } */
 
 .navbar-side {
     height: 100%;
@@ -81,7 +69,6 @@ html, body, #cesiumContainer {
     padding: 1.5rem 0;
     margin: 0;
     border-bottom: 2px solid #ccc;
-    height: 5rem;
 }
 
 .side-link {
@@ -96,23 +83,37 @@ html, body, #cesiumContainer {
     transition: 300ms ease;
 }
 
-.overlay {
-    position: fixed;
-    display: none;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    cursor: pointer;
-    background-color: #ccc;
-    opacity: 0.6;
-    z-index: 990;
-}
-
-
 .toolbar-left {
     display: block;
     position: absolute;
     top: 5px;
     left: 5px;
+}
+
+.cesium-navigation-help {
+    left: 0px;
+}
+
+#draw-line {
+    margin-left: 1em;
+    margin-right: 1em;
+}
+
+#draw-line-chk{
+    cursor: pointer;
+}
+
+#draw-line-text{
+    font-size: small;
+    font-weigh: bold;
+}
+
+#draw-line-details{
+    font-size: small;
+}
+
+
+#draw-line-details .fa-trash{
+    float: right;
+    cursor: pointer;
 }
