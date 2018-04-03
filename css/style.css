@@ -110,6 +110,7 @@ html, body, #cesiumContainer {
 
 #draw-line-details{
     font-size: small;
+    display: none;
 }
 
 

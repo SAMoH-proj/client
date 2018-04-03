@@ -3,6 +3,13 @@
 /* global Cesium */
 
 define(function(require) {
+    var config = require('config');
+
+    var EVT_LINE_ADDED = 'EVT_LINE_ADDED';
+    var EVT_POINT_ADDED = 'EVT_POINT_ADDED';
+
+    var drawLine = false;
+
     var west = 2.0;
     var south = 35.0;
     var east = 5.0;
@@ -14,38 +21,40 @@ define(function(require) {
     Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
 
     var viewer = new Cesium.Viewer('cesiumContainer', {
-        requestRenderMode: true,
-        terrainProvider: Cesium.createWorldTerrain(),
-        selectionIndicator: false,
-        baseLayerPicker: false
+        // requestRenderMode: true,
+        // terrainProvider: Cesium.createWorldTerrain(),
+        // selectionIndicator: false,
+        // baseLayerPicker: false
     });
 
-    viewer.scene.screenSpaceCameraController.enableTilt = false;
-    viewer.scene.screenSpaceCameraController.enableLook = false;
+    // viewer.scene.screenSpaceCameraController.enableTilt = false;
+    // viewer.scene.screenSpaceCameraController.enableLook = false;
     viewer.scene.globe.depthTestAgainstTerrain = true;
     viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
     viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
-    var points;
     var scene = viewer.scene;
+    var entities = viewer.entities;
     var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
     handler.setInputAction(
         function(click) {
             var cartesian = scene.pickPosition(click.position);
+            // var cartesian = viewer.camera.pickEllipsoid(click.position, scene.globe.ellipsoid);
             var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
             var lon = Cesium.Math.toDegrees(cartographic.longitude);
             var lat = Cesium.Math.toDegrees(cartographic.latitude);
+            // var height = Cesium.Math.toDegrees(cartographic.height);
 
-            if (!showPoint()) {
+            if (!drawLine) {
                 displayAvailableTiles(lon, lat);
                 return;
             }
-            if (typeof points === 'undefined') {
-                points = scene.primitives.add(new Cesium.PointPrimitiveCollection());
+            if (entities.values.length === 0) {
+                console.log(entities);
+                console.log(entities.values.length);
             }
-            else if (points.length >= 2) {
+            else if (entities.values.length >= 2) {
                 var pickedObject = scene.pick(click.position);
-
                 console.log(pickedObject);
                 return;
             }
@@ -54,37 +63,61 @@ define(function(require) {
             // but only way i could get this to work at the moment
 
             /* eslint new-cap: ["error", { "newIsCapExceptions": ["Cesium.Cartesian3.fromDegrees"] }] */
-            points.add({
-                position: new Cesium.Cartesian3.fromDegrees(lon, lat),
-                // position: new Cesium.Cartesian3(cartesian.x, cartesian.y, cartesian.z),
-                color: Cesium.Color.WHITE
-                // outlineColor : Cesium.Color.RED,
-                // outlineWidth : 2
+            entities.add({
+                // position: Cesium.Cartesian3.fromDegrees(lon, lat),
+                position: cartesian,
+                point: {
+                    color: Cesium.Color.WHITE,
+                    pixelSize: 10
+                    // heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                }
             });
 
-            if (points.length === 2) {
-                var polylines = new Cesium.PolylineCollection();
-                scene.primitives.add(polylines);
-                polylines.add({
-                    positions: [
-                        points.get(0).position,
-                        points.get(1).position
-                    ],
-                    color: Cesium.Color.WHITE
+            if (entities.values.length === 2) {
+                var positions = [
+                    entities.values[0].position.getValue(),
+                    entities.values[1].position.getValue()
+                ];
+
+                entities.add({
+                    polyline: {
+                        positions: positions,
+                        width: 10,
+                        material: new Cesium.PolylineGlowMaterialProperty({
+                            color: Cesium.Color.WHITE
+                        }),
+                        granularity: Cesium.Math.toRadians(0.1) // attempt to always make line visible
+                    }
                 });
 
-                var start = scene.globe.ellipsoid.cartesianToCartographic(points.get(0).position);
+                var start = scene.globe.ellipsoid.cartesianToCartographic(positions[0]);
                 var slon = Cesium.Math.toDegrees(start.longitude).toFixed(2);
                 var slat = Cesium.Math.toDegrees(start.latitude).toFixed(2);
-                var end = scene.globe.ellipsoid.cartesianToCartographic(points.get(1).position);
+                var end = scene.globe.ellipsoid.cartesianToCartographic(positions[1]);
                 var elon = Cesium.Math.toDegrees(end.longitude).toFixed(2);
                 var elat = Cesium.Math.toDegrees(end.latitude).toFixed(2);
-                $('#draw-line-details-text').text('LINESTRING (' + slon + ' ' + slat + ',' + elon + ' ' + elat);
 
-                viewer.scene.requestRender();
+                $.event.trigger(
+                    {
+                        type: EVT_LINE_ADDED
+                    },
+                    {
+                        start_lon: slon,
+                        start_lat: slat,
+                        end_lon: elon,
+                        end_lat: elat
+                    }
+                );
             }
             else {
-                $('#draw-line-details-text').text('POINT (' + lon.toFixed(2) + ' ' + lat.toFixed(2) + ')');
+                $.event.trigger(
+                    {
+                        type: EVT_POINT_ADDED},
+                    {
+                        lon: lon,
+                        lat: lat
+                    }
+                );
             }
 
             viewer.scene.requestRender();
@@ -101,13 +134,11 @@ define(function(require) {
                 $(this).attr('data-field-n')
             )
         }));
-        //layer.alpha = 0.5;
+        layer.alpha = 0.5;
     });
 
     var displayAvailableTiles = function(lon, lat) {
-        var url = 'http://34.241.27.59:8081/landsat';
-        console.log(url);
-        $.getJSON(url, {
+        $.getJSON(config.landsat_url, {
             lon: lon, lat: lat
         }).done(function(data) {
             $('#available-tiles').empty();
@@ -129,8 +160,16 @@ define(function(require) {
         });
     };
 
-    var showPoint = function() {
-        return $('#navbar-side').hasClass('reveal') &&
-            $('#draw-line-chk').is(':checked');
+    return {
+        EVT_LINE_ADDED: EVT_LINE_ADDED,
+        EVT_POINT_ADDED: EVT_POINT_ADDED,
+        clearLine: function(text) {
+            entities.removeAll();
+            viewer.scene.requestRender();
+        },
+
+        setDrawLine: function(draw) {
+            drawLine = draw;
+        }
     };
 });
