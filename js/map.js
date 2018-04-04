@@ -7,6 +7,7 @@ define(function(require) {
 
     var EVT_LINE_ADDED = 'EVT_LINE_ADDED';
     var EVT_POINT_ADDED = 'EVT_POINT_ADDED';
+    var EVT_DELETE_LINE = 'EVT_DELETE_LINE';
 
     var drawLine = false;
 
@@ -21,15 +22,9 @@ define(function(require) {
     Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
 
     var viewer = new Cesium.Viewer('cesiumContainer', {
-        // requestRenderMode: true,
-        // terrainProvider: Cesium.createWorldTerrain(),
-        // selectionIndicator: false,
-        // baseLayerPicker: false
+        requestRenderMode: true,
+        baseLayerPicker: false
     });
-
-    // viewer.scene.screenSpaceCameraController.enableTilt = false;
-    // viewer.scene.screenSpaceCameraController.enableLook = false;
-    viewer.scene.globe.depthTestAgainstTerrain = true;
     viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);
     viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_DOUBLE_CLICK);
 
@@ -38,38 +33,33 @@ define(function(require) {
     var handler = new Cesium.ScreenSpaceEventHandler(viewer.canvas);
     handler.setInputAction(
         function(click) {
-            var cartesian = scene.pickPosition(click.position);
-            // var cartesian = viewer.camera.pickEllipsoid(click.position, scene.globe.ellipsoid);
+            var cartesian = viewer.camera.pickEllipsoid(click.position, scene.globe.ellipsoid);
             var cartographic = Cesium.Cartographic.fromCartesian(cartesian);
             var lon = Cesium.Math.toDegrees(cartographic.longitude);
             var lat = Cesium.Math.toDegrees(cartographic.latitude);
-            // var height = Cesium.Math.toDegrees(cartographic.height);
 
             if (!drawLine) {
                 displayAvailableTiles(lon, lat);
                 return;
             }
-            if (entities.values.length === 0) {
-                console.log(entities);
-                console.log(entities.values.length);
-            }
-            else if (entities.values.length >= 2) {
+
+            if (entities.values.length >= 2) {
                 var pickedObject = scene.pick(click.position);
-                console.log(pickedObject);
+                if(pickedObject){
+                    highlightLine();
+                }
+                else{
+                    unHighlightLine();
+                }
+
                 return;
             }
 
-            // TODO: converting from cartesian to latlon and back is mad
-            // but only way i could get this to work at the moment
-
-            /* eslint new-cap: ["error", { "newIsCapExceptions": ["Cesium.Cartesian3.fromDegrees"] }] */
             entities.add({
-                // position: Cesium.Cartesian3.fromDegrees(lon, lat),
                 position: cartesian,
                 point: {
                     color: Cesium.Color.WHITE,
-                    pixelSize: 10
-                    // heightReference: Cesium.HeightReference.CLAMP_TO_GROUND
+                    pixelSize: 10,
                 }
             });
 
@@ -83,8 +73,8 @@ define(function(require) {
                     polyline: {
                         positions: positions,
                         width: 10,
-                        material: new Cesium.PolylineGlowMaterialProperty({
-                            color: Cesium.Color.WHITE
+                        material : new Cesium.PolylineOutlineMaterialProperty({
+                            color : Cesium.Color.WHITE,
                         }),
                         granularity: Cesium.Math.toRadians(0.1) // attempt to always make line visible
                     }
@@ -124,6 +114,15 @@ define(function(require) {
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK
     );
 
+    $(document).on( "keydown", function(e){
+        var code = e.keyCode || e.which;
+        console.log(code);
+        if(code === 46 && isLineHighlighted()){
+            clearLine();
+            $.event.trigger({type: EVT_DELETE_LINE});
+        }
+    });
+
     $(document).on('click', '.thumb', function() {
         var layer = scene.imageryLayers.addImageryProvider(new Cesium.SingleTileImageryProvider({
             url: $(this).attr('data-field-large-thumb'),
@@ -138,7 +137,7 @@ define(function(require) {
     });
 
     var displayAvailableTiles = function(lon, lat) {
-        $.getJSON(config.landsat_url, {
+        $.getJSON(config.backend_url + "/landsat", {
             lon: lon, lat: lat
         }).done(function(data) {
             $('#available-tiles').empty();
@@ -160,14 +159,59 @@ define(function(require) {
         });
     };
 
+    var clearLine = function(text) {
+        entities.removeAll();
+        viewer.scene.requestRender();
+    };
+
+
+    var highlightLine = function(){
+        $.each(entities.values, function(i, entity){
+            console.log(entity.polyline);
+            if(entity.polyline){
+                entity.polyline.material.outlineColor = Cesium.Color.RED;
+                entity.polyline.material.outlineWidth = 2;
+            }
+            else{
+                //console.log(entity.point);
+                entity.point.outlineColor = Cesium.Color.RED;
+                entity.point.outlineWidth = 2;
+            }
+
+            viewer.scene.requestRender();
+        });
+    };
+
+    var isLineHighlighted = function(){
+        if(entities.values.length > 0 &&
+           entities.values[0].point.outlineWidth > 0){
+            return true;
+        }
+        else{
+            return false;
+        }
+    };
+
+    var unHighlightLine = function(){
+        $.each(entities.values, function(i, entity){
+            console.log(entity.polyline);
+            if(entity.polyline){
+                entity.polyline.material.outlineWidth = 0;
+            }
+            else{
+                console.log(entity.point);
+                entity.point.outlineWidth = 0;
+            }
+
+            viewer.scene.requestRender();
+        });
+    };
+
     return {
         EVT_LINE_ADDED: EVT_LINE_ADDED,
         EVT_POINT_ADDED: EVT_POINT_ADDED,
-        clearLine: function(text) {
-            entities.removeAll();
-            viewer.scene.requestRender();
-        },
-
+        EVT_DELETE_LINE: EVT_DELETE_LINE,
+        clearLine: clearLine,
         setDrawLine: function(draw) {
             drawLine = draw;
         }

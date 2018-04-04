@@ -2,6 +2,6 @@
 
 define(function() {
     return {
-        landsat_url: 'http://localhost:8081/landsat'
+        backend_url: 'http://localhost:6080/ws'
     };
 });

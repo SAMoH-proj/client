@@ -20,4 +20,8 @@ define(function(require) {
             'POINT (' + point.lon.toFixed(2) + ' ' + point.lat.toFixed(2) + ')'
         );
     });
+
+    $(document).on(map.EVT_DELETE_LINE, function() {
+        $('#draw-line-details').hide();
+    });
 });
