@@ -23,6 +23,9 @@ define(function(require) {
 
     var viewer = new Cesium.Viewer('cesiumContainer', {
         requestRenderMode: true,
+        imageryProvider : new Cesium.createOpenStreetMapImageryProvider({
+            url : 'https://a.tile.openstreetmap.org/'
+        }),
         baseLayerPicker: false
     });
     viewer.screenSpaceEventHandler.removeInputAction(Cesium.ScreenSpaceEventType.LEFT_CLICK);

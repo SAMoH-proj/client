@@ -1,3 +1,5 @@
+/************** map *****************/
+
 html, body, #cesiumContainer {
     width: 100%;
     height: 100%;
@@ -15,6 +17,20 @@ html, body, #cesiumContainer {
     display: none;
 }
 
+.cesium-navigation-help {
+    left: 0px;
+}
+
+.toolbar-left {
+    display: block;
+    position: absolute;
+    top: 5px;
+    left: 5px;
+}
+
+
+/************** side panel *****************/
+
 #side-panel{
     position: absolute;
     z-index: 2000;
@@ -23,7 +39,7 @@ html, body, #cesiumContainer {
 #navbar-open{
     display: block;
     position: absolute;
-    top: 1em;
+    top: 0.2em;
     right: 1em;
     z-index: 2000;
 }
@@ -31,7 +47,7 @@ html, body, #cesiumContainer {
 #navbar-close-btn{
     display: block;
     position: absolute;
-    top: 0.5em;
+    top: 0.2em;
     right: 1em;
     z-index: 2000;
 }
@@ -65,10 +81,12 @@ html, body, #cesiumContainer {
     @include media-breakpoint-up(md) { width: 25%; } // Large
 }
 
-.navbar-side-item {
-    padding: 1.5rem 0;
-    margin: 0;
-    border-bottom: 2px solid #ccc;
+#draw-line{
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+#available-tiles{
+    background-color: black;
 }
 
 .side-link {
@@ -81,17 +99,6 @@ html, body, #cesiumContainer {
     transform: translateX(0%);
     -webkit-transition: 300ms ease;
     transition: 300ms ease;
-}
-
-.toolbar-left {
-    display: block;
-    position: absolute;
-    top: 5px;
-    left: 5px;
-}
-
-.cesium-navigation-help {
-    left: 0px;
 }
 
 #draw-line {
@@ -112,7 +119,6 @@ html, body, #cesiumContainer {
     font-size: small;
     display: none;
 }
-
 
 #draw-line-details .fa-trash{
     float: right;
