@@ -40,7 +40,7 @@ html, body, #cesiumContainer {
     display: block;
     position: absolute;
     top: 0.2em;
-    right: 1em;
+    right: 1.8em;
     z-index: 2000;
 }
 
@@ -123,4 +123,18 @@ html, body, #cesiumContainer {
 #draw-line-details .fa-trash{
     float: right;
     cursor: pointer;
+}
+
+#available-tiles .thumb{
+    border-bottom: white solid 1px;
+    margin: 0.5em 0.2em 0 1em;
+}
+#available-tiles img{
+    height: 228px;
+    width: 232px;
+}
+
+#thumb-meta{
+    color: white;
+    font-size: small;
 }
