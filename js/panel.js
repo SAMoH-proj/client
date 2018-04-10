@@ -9,6 +9,19 @@ define(function(require) {
         $('#draw-line-details').show();
     };
 
+    $('#navbar-side').addClass('reveal');
+    $('#navbar-open-btn').on('click', function() {
+        $('#navbar-side').addClass('reveal');
+    });
+
+    $('#navbar-close-btn').on('click', function() {
+        $('#navbar-side').removeClass('reveal');
+    });
+
+    $('#draw-line-chk').on('click', function() {
+        map.setDrawLine($(this).is(':checked'));
+    });
+
     $(document).on(map.EVT_DELETE_LINE, function() {
         $('#draw-line-details').hide();
     });
@@ -22,7 +35,7 @@ define(function(require) {
 
     $(document).on(map.EVT_MAP_CLICK, function(evt, point) {
         $('#available-tiles').empty();
-        $.getJSON(config.backend_url + "/landsat", {
+        $.getJSON(config.backend_url + '/landsat', {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
             // TODO: just showing first 10
@@ -38,12 +51,12 @@ define(function(require) {
                         '" data-field-w="' + entry.min_lon +
                         '" data-field-n="' + entry.max_lat +
                         '" data-field-s="' + entry.min_lat +
-                        '"><img src="' + sThumb + '"></img><div id="thumb-meta"><div id=thumb-meta-acquisitionDate>' +
+                        '"><img src="' + sThumb +
+                        '"></img><div id="thumb-meta"><div id=thumb-meta-acquisitionDate>' +
                         entry.acquisitionDate + '</div></div></div>');
             });
         });
     });
-
 
     $(document).on('click', '.thumb', function() {
         map.displayOverlay(
@@ -57,11 +70,14 @@ define(function(require) {
         );
     });
 
-
     $(document).on(map.EVT_POINT_ADDED, function(evt, point) {
         displayPointDetails(
             'POINT (' + point.lon.toFixed(2) + ' ' + point.lat.toFixed(2) + ')'
         );
     });
 
+    $('#draw-line-details-delete').on('click', function() {
+        map.clearLine();
+        $('#draw-line-details').hide();
+    });
 });

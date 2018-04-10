@@ -129,6 +129,7 @@ html, body, #cesiumContainer {
     border-bottom: white solid 1px;
     margin: 0.5em 0.2em 0 1em;
 }
+
 #available-tiles img{
     height: 228px;
     width: 232px;
@@ -137,4 +138,17 @@ html, body, #cesiumContainer {
 #thumb-meta{
     color: white;
     font-size: small;
+}
+
+
+/************** server messages *****************/
+#server-messages{
+    position: absolute;
+    display: none;
+    bottom: 2em;
+    left: 2em;
+}
+
+.close{
+    margin-left: 1em;
 }

@@ -4,8 +4,8 @@
 
 define(function(require) {
     var EVT_DELETE_LINE = 'EVT_DELETE_LINE';
-    var EVT_LINE_ADDED  = 'EVT_LINE_ADDED';
-    var EVT_MAP_CLICK   = 'EVT_MAP_CLICK';
+    var EVT_LINE_ADDED = 'EVT_LINE_ADDED';
+    var EVT_MAP_CLICK = 'EVT_MAP_CLICK';
     var EVT_POINT_ADDED = 'EVT_POINT_ADDED';
 
     var drawLine = false;
@@ -21,10 +21,13 @@ define(function(require) {
     Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
     Cesium.BingMapsApi.defaultKey = null;
 
+    /* eslint new-cap: ["error", { "newIsCapExceptions": ["Cesium.createOpenStreetMapImageryProvider"] }] */
     var viewer = new Cesium.Viewer('cesiumContainer', {
         requestRenderMode: true,
-        imageryProvider : new Cesium.createOpenStreetMapImageryProvider({
-            url : 'https://a.tile.openstreetmap.org/'
+        animation: false,
+        timeline: false,
+        imageryProvider: new Cesium.createOpenStreetMapImageryProvider({
+            url: 'https://a.tile.openstreetmap.org/'
         }),
         baseLayerPicker: false,
         geocoder: false // bing api used in geocoder
@@ -49,10 +52,10 @@ define(function(require) {
 
             if (entities.values.length >= 2) {
                 var pickedObject = scene.pick(click.position);
-                if(pickedObject){
+                if (pickedObject) {
                     highlightLine();
                 }
-                else{
+                else {
                     unHighlightLine();
                 }
 
@@ -63,7 +66,7 @@ define(function(require) {
                 position: cartesian,
                 point: {
                     color: Cesium.Color.WHITE,
-                    pixelSize: 10,
+                    pixelSize: 10
                 }
             });
 
@@ -77,8 +80,8 @@ define(function(require) {
                     polyline: {
                         positions: positions,
                         width: 10,
-                        material : new Cesium.PolylineOutlineMaterialProperty({
-                            color : Cesium.Color.WHITE,
+                        material: new Cesium.PolylineOutlineMaterialProperty({
+                            color: Cesium.Color.WHITE
                         }),
                         granularity: Cesium.Math.toRadians(0.1) // attempt to always make line visible
                     }
@@ -118,10 +121,9 @@ define(function(require) {
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK
     );
 
-    $(document).on( "keydown", function(e){
+    $(document).on('keydown', function(e) {
         var code = e.keyCode || e.which;
-        console.log(code);
-        if(code === 46 && isLineHighlighted()){
+        if (code === 46 && isLineHighlighted()) {
             clearLine();
             $.event.trigger({type: EVT_DELETE_LINE});
         }
@@ -145,7 +147,7 @@ define(function(require) {
     };
 
     var displayOverlay = function(url, extents) {
-        var layer = scene.imageryLayers.addImageryProvider(
+        scene.imageryLayers.addImageryProvider(
             new Cesium.SingleTileImageryProvider({
                 url: url,
                 rectangle: Cesium.Rectangle.fromDegrees(
@@ -156,18 +158,16 @@ define(function(require) {
                 )
             })
         );
-        layer.alpha = 0.5;
+        // layer.alpha = 0.5;
     };
 
-    var highlightLine = function(){
-        $.each(entities.values, function(i, entity){
-            console.log(entity.polyline);
-            if(entity.polyline){
+    var highlightLine = function() {
+        $.each(entities.values, function(i, entity) {
+            if (entity.polyline) {
                 entity.polyline.material.outlineColor = Cesium.Color.RED;
                 entity.polyline.material.outlineWidth = 2;
             }
-            else{
-                //console.log(entity.point);
+            else {
                 entity.point.outlineColor = Cesium.Color.RED;
                 entity.point.outlineWidth = 2;
             }
@@ -176,23 +176,23 @@ define(function(require) {
         });
     };
 
-    var isLineHighlighted = function(){
-        if(entities.values.length > 0 &&
-           entities.values[0].point.outlineWidth > 0){
+    var isLineHighlighted = function() {
+        if (entities.values.length > 0 &&
+            entities.values[0].point.outlineWidth > 0) {
             return true;
         }
-        else{
+        else {
             return false;
         }
     };
 
-    var unHighlightLine = function(){
-        $.each(entities.values, function(i, entity){
+    var unHighlightLine = function() {
+        $.each(entities.values, function(i, entity) {
             console.log(entity.polyline);
-            if(entity.polyline){
+            if (entity.polyline) {
                 entity.polyline.material.outlineWidth = 0;
             }
-            else{
+            else {
                 console.log(entity.point);
                 entity.point.outlineWidth = 0;
             }

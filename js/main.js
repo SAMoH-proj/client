@@ -3,23 +3,15 @@
 /* global require */
 
 $(document).ready(function() {
-    require(['map', 'panel'], function(map, panel) {
-        $('#navbar-side').addClass('reveal');
-        $('#navbar-open-btn').on('click', function() {
-            $('#navbar-side').addClass('reveal');
-        });
+    require(['map', 'panel', 'config'], function(map, panel, config){
+        var websocket = new WebSocket(config.backend_url);
+        websocket.onmessage = function(evt) {
+            $('#server-messages').show();
+            $('#server-messages-text').text(evt.data);
+        };
 
-        $('#navbar-close-btn').on('click', function() {
-            $('#navbar-side').removeClass('reveal');
-        });
-
-        $('#draw-line-chk').on('click', function() {
-            map.setDrawLine($(this).is(':checked'));
-        });
-
-        $('#draw-line-details-delete').on('click', function() {
-            map.clearLine();
-            $('#draw-line-details').hide();
+        $('#server-messages .close').on('click', function() {
+            $('#server-messages').hide();
         });
     });
 });
