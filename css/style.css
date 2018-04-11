@@ -125,6 +125,10 @@ html, body, #cesiumContainer {
     cursor: pointer;
 }
 
+#available-tiles{
+    color: white;
+}
+
 #available-tiles .thumb{
     border-bottom: white solid 1px;
     margin: 0.5em 0.2em 0 1em;
@@ -133,15 +137,37 @@ html, body, #cesiumContainer {
 #available-tiles img{
     height: 228px;
     width: 232px;
+    cursor: pointer;
 }
 
-#thumb-meta{
-    color: white;
-    font-size: small;
+.thumb-meta{
+    font-size: x-small;
+}
+
+.thumb-meta th{
+    border: none;
+    padding: 0.1em;
+}
+
+.thumb-meta table{
+    margin: 0;
+}
+
+.thumb-meta .collapsible{
+    display: none;
+}
+
+.thumb-meta-more{
+    position: relative;
+    top: -1em;
+    float: right;
+    cursor: pointer;
+    height: 0;
 }
 
 
 /************** server messages *****************/
+
 #server-messages{
     position: absolute;
     display: none;
