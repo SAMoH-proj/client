@@ -47,7 +47,8 @@ define(function(require) {
                 var lThumb = imagePath + '/' + productId + '_thumb_large.jpg';
 
                 $('#available-tiles').append(`
-                    <div class="thumb loader"
+                      <div class="thumb loader"
+                         data-field-id="${entry.entityId}"
                          data-field-large-thumb="${lThumb}"
                          data-field-e="${entry.max_lon}"
                          data-field-w="${entry.min_lon}"
@@ -118,15 +119,24 @@ define(function(require) {
 
     $(document).on('click', '.thumb img', function() {
         var div = $(this).parent();
-        map.displayOverlay(
-            div.attr('data-field-large-thumb'),
-            {
-                west: div.attr('data-field-w'),
-                south: div.attr('data-field-s'),
-                east: div.attr('data-field-e'),
-                north: div.attr('data-field-n')
-            }
-        );
+        if(div.hasClass('selected')){
+            // delete overlay using entity id
+            map.removeOverlay(div.attr('data-field-id'));
+            div.removeClass('selected');
+        }
+        else{
+            div.addClass('selected');
+            map.displayOverlay(
+                div.attr('data-field-id'),
+                div.attr('data-field-large-thumb'),
+                {
+                    west: div.attr('data-field-w'),
+                    south: div.attr('data-field-s'),
+                    east: div.attr('data-field-e'),
+                    north: div.attr('data-field-n')
+                }
+            );
+        }
     });
 
     $(document).on('click', '.thumb-meta-more', function(evt) {

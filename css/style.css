@@ -12,9 +12,9 @@ html, body, #cesiumContainer {
     left: 5px;
 }
 
-/* hide search */
-.cesium-viewer-geocoderContainer{
-    display: none;
+/* hide search and cesium logo*/
+.cesium-viewer-geocoderContainer, .cesium-credit-logoContainer{
+    display: none !important;
 }
 
 .cesium-navigation-help {
@@ -131,7 +131,11 @@ html, body, #cesiumContainer {
 
 #available-tiles .thumb{
     border-bottom: white solid 1px;
-    margin: 0.5em 0.2em 0 1em;
+    padding: 1em;
+}
+
+#available-tiles .selected{
+    border: #0a84ff solid 0.2em;
 }
 
 #available-tiles img{

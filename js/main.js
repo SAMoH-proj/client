@@ -3,7 +3,7 @@
 /* global require */
 
 $(document).ready(function() {
-    require(['map', 'panel', 'config'], function(map, panel, config){
+    require(['map', 'panel', 'config'], function(map, panel, config) {
         var websocket = new WebSocket(config.backend_url);
         websocket.onmessage = function(evt) {
             $('#server-messages').show();

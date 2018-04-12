@@ -10,13 +10,15 @@ define(function(require) {
 
     var drawLine = false;
 
+    // map of layers added to map
+    var layers = {};
+
     var west = 2.0;
     var south = 35.0;
     var east = 5.0;
     var north = 60.0;
 
     var rectangle = Cesium.Rectangle.fromDegrees(west, south, east, north);
-
     Cesium.Camera.DEFAULT_VIEW_FACTOR = 0;
     Cesium.Camera.DEFAULT_VIEW_RECTANGLE = rectangle;
     Cesium.BingMapsApi.defaultKey = null;
@@ -27,7 +29,8 @@ define(function(require) {
         animation: false,
         timeline: false,
         imageryProvider: new Cesium.createOpenStreetMapImageryProvider({
-            url: 'https://a.tile.openstreetmap.org/'
+            url: 'https://a.tile.openstreetmap.org/',
+            credit: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a>'
         }),
         baseLayerPicker: false,
         geocoder: false // bing api used in geocoder
@@ -146,19 +149,22 @@ define(function(require) {
         );
     };
 
-    var displayOverlay = function(url, extents) {
-        scene.imageryLayers.addImageryProvider(
-            new Cesium.SingleTileImageryProvider({
-                url: url,
-                rectangle: Cesium.Rectangle.fromDegrees(
-                    extents.west,
-                    extents.south,
-                    extents.east,
-                    extents.north
-                )
-            })
-        );
-        // layer.alpha = 0.5;
+    var displayOverlay = function(id, url, extents) {
+        var provider = new Cesium.SingleTileImageryProvider({
+            url: url,
+            rectangle: Cesium.Rectangle.fromDegrees(
+                extents.west,
+                extents.south,
+                extents.east,
+                extents.north
+            )
+        })
+        layers[id] = scene.imageryLayers.addImageryProvider(provider);
+    };
+
+    var removeOverlay = function(id) {
+        scene.imageryLayers.remove(layers[id]);
+        delete layers[id]
     };
 
     var highlightLine = function() {
@@ -209,6 +215,7 @@ define(function(require) {
 
         clearLine: clearLine,
         displayOverlay: displayOverlay,
+        removeOverlay: removeOverlay,
         setDrawLine: function(draw) {
             drawLine = draw;
         }
