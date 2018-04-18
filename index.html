@@ -50,15 +50,48 @@
 
         <li class="navbar-side-item">
           <div id="draw-line" class="form-check">
-            <input id="draw-line-chk" type="checkbox" class="form-check-input">
+            <input id="draw-line-chk"
+                   name="map-select"
+                   type="radio"
+                   value="line"
+                   class="form-check-input">
             <img src="img/vector-path-line.svg"
                  height="20px"
                  width="20px"/>
-            <label for="draw-line-chk">Draw Line</label>
-            <div id="draw-line-details" >
-              <span id="draw-line-details-text"></span>
-              <i id="draw-line-details-delete" class="fas fa-trash"></i>
-            </div>
+            <label for="draw-line-chk">NDVI Transect</label>
+          </div>
+          <div id="draw-rect" class="form-check">
+            <input id="draw-rect-chk"
+                   name="map-select"
+                   type="radio"
+                   value="rect"
+                   class="form-check-input">
+            <img src="img/vector-path-square.svg"
+                 height="20px"
+                 width="20px"/>
+            <label for="draw-line-chk">NDVI Time Series</label>
+          </div>
+          <div id="fetch-tiles" class="form-check">
+            <input id="fetch-tiles-chk"
+                   name="map-select"
+                   type="radio"
+                   value="point"
+                   class="form-check-input" checked>
+            <img src="img/map-9.svg"
+                 height="20px"
+                 width="20px"/>
+
+            <label for="draw-line-chk">Fetch Tiles</label>
+          </div>
+          <div id="draw-details" >
+            <i id="draw-details-delete"
+               title="Delete Shape"
+               class="fas fa-trash"></i>
+            <button id="create-image-btn"
+                    title="Create"
+                    type="button"
+                    class="btn btn-dark btn-block">
+            </button>
           </div>
         </li>
 
@@ -71,6 +104,31 @@
     </nav>
 
     <div id="cesiumContainer"></div>
+
+    <!-- image popup -->
+    <div class="modal fade"
+         id="view-image-popup"
+         tabindex="-1"
+         role="dialog"
+         aria-labelledby="view-image-title"
+         aria-hidden="true">
+      <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="view-image-title">View Image</h5>
+            <button type="button"
+                    class="close"
+                    data-dismiss="modal"
+                    aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <img id="view-image">
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div id="server-messages" class="alert alert-info" role="alert">
       <span id="server-messages-text">Hello</span>

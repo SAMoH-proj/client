@@ -4,11 +4,6 @@ define(function(require) {
     var config = require('config');
     var map = require('map');
 
-    var displayPointDetails = function(text) {
-        $('#draw-line-details-text').text(text);
-        $('#draw-line-details').show();
-    };
-
     $('#navbar-side').addClass('reveal');
     $('#navbar-open-btn').on('click', function() {
         $('#navbar-side').addClass('reveal');
@@ -18,22 +13,27 @@ define(function(require) {
         $('#navbar-side').removeClass('reveal');
     });
 
-    $('#draw-line-chk').on('click', function() {
-        map.setDrawLine($(this).is(':checked'));
+    $('input[name="map-select"]').on('click', function(e) {
+        map.setSelectType($(e.target).val());
+        $('#draw-details').hide();
+        map.clearMap();
     });
 
     $(document).on(map.EVT_DELETE_LINE, function() {
-        $('#draw-line-details').hide();
+        $('#draw-details').hide();
     });
 
-    $(document).on(map.EVT_LINE_ADDED, function(evt, line) {
-        displayPointDetails(
-            'LINESTRING (' + line.start_lon + ' ' + line.start_lat +
-                ', ' + line.end_lon + ' ' + line.end_lat + ')'
-        );
+    $(document).on(map.EVT_LINE_ADDED, function(e, line) {
+        $('#draw-details').show();
+        $('#create-image-btn').text('Create NDVI Transect');
     });
 
-    $(document).on(map.EVT_MAP_CLICK, function(evt, point) {
+    $(document).on(map.EVT_RECT_ADDED, function(e) {
+        $('#draw-details').show();
+        $('#create-image-btn').text('Create NDVI Time Series');
+    });
+
+    $(document).on(map.EVT_MAP_CLICK, function(e, point) {
         $('#available-tiles').empty();
         $.getJSON(config.backend_url + '/landsat', {
             lon: point.lon, lat: point.lat
@@ -139,7 +139,7 @@ define(function(require) {
         }
     });
 
-    $(document).on('click', '.thumb-meta-more', function(evt) {
+    $(document).on('click', '.thumb-meta-more', function(e) {
         if ($(this).text() === 'more') {
             $(this).siblings().find('.collapsible').show();
             $(this).text('less');
@@ -150,14 +150,35 @@ define(function(require) {
         }
     });
 
-    $(document).on(map.EVT_POINT_ADDED, function(evt, point) {
-        displayPointDetails(
-            'POINT (' + point.lon.toFixed(2) + ' ' + point.lat.toFixed(2) + ')'
-        );
+    $('#draw-details-delete').on('click', function() {
+        map.clearMap();
+        $('#draw-details').hide();
     });
 
-    $('#draw-line-details-delete').on('click', function() {
-        map.clearLine();
-        $('#draw-line-details').hide();
+
+    $('#create-image-btn').on('click', function() {
+        var selection = 'line';
+        var type = 'ndvi_transect';
+        var extents;
+
+        if($('#draw-line-chk:checked').length === 1){
+            console.log(map.getTransectExtents());
+            extents = map.getTransectExtents();
+        }
+        else if($('#draw-rect-chk:checked').length === 1){
+            selection = 'rectangle';
+            type = 'ndvi_time_series';
+            console.log(map.getTimeSeriesExtents());
+            extents = map.getTimeSeriesExtents();
+        }
+
+        var url = config.backend_url + '/datacube?selection=' + selection +
+            '&type=' + type +
+            '&xmin=' + extents.xmin +
+            '&xmax=' + extents.xmax +
+            '&ymin=' + extents.ymin +
+            '&ymax=' + extents.ymax;
+        $("#view-image").attr('src', url);
+        $('#view-image-popup').modal({})
     });
 });
