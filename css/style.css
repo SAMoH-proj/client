@@ -36,6 +36,14 @@ html, body, #cesiumContainer {
     z-index: 2000;
 }
 
+#side-panel a{
+    color: #495057;
+}
+
+#side-panel .nav-link.active{
+    font-weight: bold;
+}
+
 #navbar-open{
     display: block;
     position: absolute;
@@ -89,9 +97,6 @@ html, body, #cesiumContainer {
     font-size: small;
 }
 
-#side-panel input[type="radio"]{
-    cursor: pointer;
-}
 
 .side-link {
     padding-left: 2rem;
@@ -105,21 +110,22 @@ html, body, #cesiumContainer {
     transition: 300ms ease;
 }
 
-#side-panel .form-check{
-    padding-top: 0.2em;
-    padding-bottom: 0.2em;
-    margin-left: 1em;
-    margin-right: 1em;
+#function-selector{
+    padding: 0 0 1em 1em;
 }
 
-#side-panel label{
-    padding-left: 0.5em;
+#function-selector img{
+    margin-right: 0.5em;
 }
 
-#draw-line-chk{
-    cursor: pointer;
+.btn, .dropdown-menu{
+    font-size: small;
 }
 
+#side-panel .dropdown-item.active{
+    background-color: #495057;
+    color: white;
+}
 
 #draw-details{
     display: none;
@@ -189,9 +195,9 @@ html, body, #cesiumContainer {
     max-height: 100%;
 }
 
-/************** server messages *****************/
+/************** popup messages *****************/
 
-#server-messages{
+#server-messages, #alert{
     position: absolute;
     display: none;
     bottom: 2em;

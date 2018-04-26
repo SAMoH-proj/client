@@ -4,38 +4,22 @@ define(function(require) {
     var config = require('config');
     var map = require('map');
 
-    $('#navbar-side').addClass('reveal');
-    $('#navbar-open-btn').on('click', function() {
-        $('#navbar-side').addClass('reveal');
-    });
+    // current point for fetching tiles
+    var currentPoint;
 
-    $('#navbar-close-btn').on('click', function() {
-        $('#navbar-side').removeClass('reveal');
-    });
-
-    $('input[name="map-select"]').on('click', function(e) {
-        map.setSelectType($(e.target).val());
-        $('#draw-details').hide();
-        map.clearMap();
-    });
-
-    $(document).on(map.EVT_DELETE_LINE, function() {
-        $('#draw-details').hide();
-    });
-
-    $(document).on(map.EVT_LINE_ADDED, function(e, line) {
-        $('#draw-details').show();
-        $('#create-image-btn').text('Create NDVI Transect');
-    });
-
-    $(document).on(map.EVT_RECT_ADDED, function(e) {
-        $('#draw-details').show();
-        $('#create-image-btn').text('Create NDVI Time Series');
-    });
-
-    $(document).on(map.EVT_MAP_CLICK, function(e, point) {
+    /**
+     * Fetch satellite thumbnail tiles and metadata for selected point.
+     * @param point User selected latlon.
+     */
+    var fetchTiles = function(point){
         $('#available-tiles').empty();
-        $.getJSON(config.backend_url + '/landsat', {
+
+        if(point === undefined){
+            return;
+        }
+
+        var sat = $('#satellite-selector a.active').attr('data-field-name');
+        $.getJSON(config.backend_url + '/' + sat, {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
             // TODO: just showing first 10
@@ -114,7 +98,64 @@ define(function(require) {
                     </div>`
                 );
             });
+        }).fail(function(err) {
+            console.log(err);
+            $('#alert-text').text('Currently unable to view tiles');
+            $('#alert').show();
         });
+    };
+
+    $('#navbar-side').addClass('reveal');
+    $('#navbar-open-btn').on('click', function() {
+        $('#navbar-side').addClass('reveal');
+    });
+
+    $('#navbar-close-btn').on('click', function() {
+        $('#navbar-side').removeClass('reveal');
+    });
+
+    $("#function-selector a").click(function(e){
+        $('#draw-details').hide();
+        $('#function-selector a').removeClass('active');
+        var id = $(e.target).attr('id') || $(e.target).parent().attr('id');
+        map.setSelectType(id.split('-')[1]);
+        map.clearMap();
+        $('#' + id).addClass('active');
+        $('#function-selector button img').attr(
+            'src', $('#' + id + ' img').attr('src')
+        );
+
+        var html = '<img src="' + $('#' + id + ' img').attr('src') + '" height="20px" width="20px"/>' + $('#' + id).text().trim();
+
+        $('#function-selector button').html(html);
+    });
+
+    $("#satellite-selector a").click(function(e){
+        $('#satellite-selector a').removeClass('active');
+        //var id = $(e.target);
+        $(e.target).addClass('active');
+        fetchTiles(currentPoint);
+    });
+
+
+    $(document).on(map.EVT_DELETE_LINE, function() {
+        $('#draw-details').hide();
+    });
+
+    $(document).on(map.EVT_LINE_ADDED, function(e, line) {
+        $('#draw-details').show();
+        $('#create-image-btn').text('Create NDVI Transect');
+    });
+
+    $(document).on(map.EVT_RECT_ADDED, function(e) {
+        $('#draw-details').show();
+        var description = $('#function-selector a[class*="active"]').attr('data-field-description');
+        $('#create-image-btn').text('Create ' + description);
+    });
+
+    $(document).on(map.EVT_MAP_CLICK, function(e, point) {
+        currentPoint = point;
+        fetchTiles(point);
     });
 
     $(document).on('click', '.thumb img', function() {
@@ -161,14 +202,15 @@ define(function(require) {
         var type = 'ndvi_transect';
         var extents;
 
-        if($('#draw-line-chk:checked').length === 1){
-            console.log(map.getTransectExtents());
+        $("#view-image").attr('src', '');
+
+        var id = $('#function-selector a[class*="active"]').attr('id');
+        if(id === 'ndvi-transect'){
             extents = map.getTransectExtents();
         }
-        else if($('#draw-rect-chk:checked').length === 1){
+        else if(id.endsWith('rectangle')){
             selection = 'rectangle';
-            type = 'ndvi_time_series';
-            console.log(map.getTimeSeriesExtents());
+            type = $('#function-selector a[class*="active"]').attr('data-field-type');
             extents = map.getTimeSeriesExtents();
         }
 

@@ -49,40 +49,50 @@
 
 
         <li class="navbar-side-item">
-          <div id="draw-line" class="form-check">
-            <input id="draw-line-chk"
-                   name="map-select"
-                   type="radio"
-                   value="line"
-                   class="form-check-input">
-            <img src="img/vector-path-line.svg"
-                 height="20px"
-                 width="20px"/>
-            <label for="draw-line-chk">NDVI Transect</label>
-          </div>
-          <div id="draw-rect" class="form-check">
-            <input id="draw-rect-chk"
-                   name="map-select"
-                   type="radio"
-                   value="rect"
-                   class="form-check-input">
-            <img src="img/vector-path-square.svg"
-                 height="20px"
-                 width="20px"/>
-            <label for="draw-line-chk">NDVI Time Series</label>
-          </div>
-          <div id="fetch-tiles" class="form-check">
-            <input id="fetch-tiles-chk"
-                   name="map-select"
-                   type="radio"
-                   value="point"
-                   class="form-check-input" checked>
-            <img src="img/map-9.svg"
-                 height="20px"
-                 width="20px"/>
 
-            <label for="draw-line-chk">Fetch Tiles</label>
+          <div id="function-selector" class="dropdown">
+            <button type="button"
+                    class="btn btn-outline-secondary dropdown-toggle"
+                    data-toggle="dropdown">
+              <img src="img/map-9.svg" height="20px" width="20px"/>
+              Fetch Tiles
+            </button>
+            <div class="dropdown-menu">
+              <a id="ndvi-transect" class="dropdown-item" href="#">
+                <img src="img/vector-path-line.svg" height="20px" width="20px"/>
+                NDVI Transect
+              </a>
+              <a id="ndvi-rectangle"
+                 class="dropdown-item"
+                 data-field-type="ndvi_time_series"
+                 data-field-description="NDVI Time Series"
+                 href="#">
+                <img src="img/vector-path-square.svg" height="20px" width="20px"/>
+                NDVI Time Series
+              </a>
+              <a id="ts-rectangle"
+                 class="dropdown-item"
+                 data-field-type="time_series"
+                 data-field-description="Time Series"
+                 href="#">
+                <img src="img/vector-path-square.svg" height="20px" width="20px"/>
+                Time Series
+              </a>
+              <a id="std-rectangle"
+                 class="dropdown-item"
+                 data-field-type="ndvi_std_dev"
+                 data-field-description="NDVI Std Dev"
+                 href="#">
+                <img src="img/vector-path-square.svg" height="20px" width="20px"/>
+                NDVI STD Dev
+              </a>
+              <a id="fetch-tiles" class="dropdown-item active" href="#">
+                <img src="img/map-9.svg" height="20px" width="20px"/>
+                Fetch Tiles
+              </a>
+            </div>
           </div>
+
           <div id="draw-details" >
             <i id="draw-details-delete"
                title="Delete Shape"
@@ -90,12 +100,25 @@
             <button id="create-image-btn"
                     title="Create"
                     type="button"
-                    class="btn btn-dark btn-block">
+                    class="btn btn-secondary btn-block">
             </button>
           </div>
         </li>
 
-        <li class="navbar-side-item">
+        <li id="satellite-selector" class="navbar-side-item">
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <a class="nav-link active"
+                 data-field-name="sentinel"
+                 href="#">Sentinel</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link"
+                 data-field-name="landsat"
+                 href="#">Landsat</a>
+            </li>
+          </ul>
+
           <div id="available-tiles">
           </div>
         </li>
@@ -132,6 +155,16 @@
 
     <div id="server-messages" class="alert alert-info" role="alert">
       <span id="server-messages-text">Hello</span>
+      <button
+         type="button"
+         class="close"
+         aria-label="Close">
+        <span aria-hidden="true">&times;</span>
+      </button>
+    </div>
+
+    <div id="alert" class="alert alert-warning" role="alert">
+      <span id="alert-text"></span>
       <button
          type="button"
          class="close"

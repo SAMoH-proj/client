@@ -8,7 +8,7 @@ define(function(require) {
     var EVT_RECT_ADDED = 'EVT_RECT_ADDED';
     var EVT_MAP_CLICK = 'EVT_MAP_CLICK';
 
-    var mapSelectType = 'point';
+    var mapSelectType = 'tiles';
 
     // map of layers added to map
     var layers = {};
@@ -53,11 +53,11 @@ define(function(require) {
             var lon = Cesium.Math.toDegrees(cartographic.longitude);
             var lat = Cesium.Math.toDegrees(cartographic.latitude);
 
-            if (mapSelectType === 'point') {
+            if (mapSelectType === 'tiles') {
                 displayAvailableTiles(lon, lat);
                 return;
             }
-            else if (mapSelectType === 'line'){
+            else if (mapSelectType === 'transect'){
                 drawLine(cartesian, lon, lat);
 
                 if (entities.getById('transect')) {
@@ -90,7 +90,7 @@ define(function(require) {
     var cartesian = new Cesium.Cartesian3();
     var tempCartographic = new Cesium.Cartographic();
     screenSpaceEventHandler.setInputAction(function drawSelector(movement) {
-        if (!mouseDown || mapSelectType !== 'rect') {
+        if (!mouseDown || mapSelectType !== 'rectangle') {
             return;
         }
 
@@ -159,7 +159,7 @@ define(function(require) {
     $(document).on('keydown', function(e) {
         var code = e.keyCode || e.which;
         if (code === 46 && isLineHighlighted()) {
-            clearLine();
+            clearMap();
             $.event.trigger({type: EVT_DELETE_LINE});
         }
     });
