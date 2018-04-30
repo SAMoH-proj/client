@@ -16,13 +16,23 @@ define(function(require) {
     /**
      * Display a single satellite thumbnail tile and metadata for selected point.
      * @param entry The tile metadata object.
+     * @param satName Name of the satellite.
      */
-    var displayTile = function(entry) {
+    var displayTile = function(entry, satName) {
         var url = entry.download_url;
         var imagePath = url.substr(0, url.lastIndexOf('/'));
         var productId = url.split('/')[8];
-        var sThumb = imagePath + '/' + productId + '_thumb_small.jpg';
-        var lThumb = imagePath + '/' + productId + '_thumb_large.jpg';
+        var sThumb;
+        var lThumb;
+
+        if (satName === 'landsat') {
+            sThumb = imagePath + '/' + productId + '_thumb_small.jpg';
+            lThumb = imagePath + '/' + productId + '_thumb_large.jpg';
+        }
+        else {
+            sThumb = url;
+            lThumb = url;
+        }
 
         $('#available-tiles').append(`
           <div class="thumb loader"
@@ -94,9 +104,10 @@ define(function(require) {
 
     /**
      * Display 10 thumbnail tiles and metadata for selected point.
+     * @param satName Name of the satellite.
      * @return Number of tiles displayed that passed filter.
      */
-    var displayTiles = function() {
+    var displayTiles = function(satName) {
         var viewCount = 0;
 
         var startDate = new Date($('#filter-start').val());
@@ -109,7 +120,7 @@ define(function(require) {
             var acquisitionDate = new Date(entry.acquisitionDate);
             if (acquisitionDate >= startDate &&
                 acquisitionDate <= endDate) {
-                displayTile(entry);
+                displayTile(entry, satName);
                 ++viewCount;
             }
             if (viewCount === 10) {
@@ -142,7 +153,8 @@ define(function(require) {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
             tiles = data.msg;
-            var viewCount = displayTiles(tiles);
+            console.log(tiles);
+            var viewCount = displayTiles(sat);
             if (viewCount === 0) {
                 $('#available-tiles').text('No tiles available');
             }
@@ -155,7 +167,8 @@ define(function(require) {
 
     // view more tiles
     $('#available-tiles-more-btn').on('click', function() {
-        displayTiles();
+        var sat = $('#satellite-selector a.active').attr('data-field-name');
+        displayTiles(sat);
     });
 
     $('#navbar-side').addClass('reveal');
@@ -192,6 +205,7 @@ define(function(require) {
     });
 
     $('#satellite-selector a').click(function(e) {
+        $('#available-tiles-more-btn').hide();
         $('#satellite-selector a').removeClass('active');
         $(e.target).addClass('active');
         fetchTiles(currentPoint);
