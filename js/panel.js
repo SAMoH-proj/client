@@ -11,7 +11,7 @@ define(function(require) {
     var tiles;
 
     // index of last tile displayed
-    var lastIndex;
+    var lastIndex = 0;
 
     /**
      * Display a single satellite thumbnail tile and metadata for selected point.
@@ -93,10 +93,44 @@ define(function(require) {
     };
 
     /**
+     * Display 10 thumbnail tiles and metadata for selected point.
+     * @return Number of tiles displayed that passed filter.
+     */
+    var displayTiles = function() {
+        var viewCount = 0;
+
+        var startDate = new Date($('#filter-start').val());
+        var endDate = new Date($('#filter-end').val());
+
+        $('#available-tiles-more-btn').hide();
+
+        for (var i = lastIndex; i < tiles.length; i++) {
+            var entry = tiles[i];
+            var acquisitionDate = new Date(entry.acquisitionDate);
+            if (acquisitionDate >= startDate &&
+                acquisitionDate <= endDate) {
+                displayTile(entry);
+                ++viewCount;
+            }
+            if (viewCount === 10) {
+                lastIndex = i + 1;
+                if (lastIndex !== tiles.length) {
+                    $('#available-tiles-more-btn').show();
+                }
+
+                break;
+            }
+        }
+
+        return viewCount;
+    };
+
+    /**
      * Fetch satellite thumbnail tiles and metadata for selected point.
      * @param point User selected latlon.
      */
     var fetchTiles = function(point) {
+        lastIndex = 0;
         $('#available-tiles').empty();
 
         if (point === undefined) {
@@ -108,30 +142,21 @@ define(function(require) {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
             tiles = data.msg;
-            var viewCount = 0;
-
-            var startDate = new Date($('#filter-start').val());
-            var endDate = new Date($('#filter-end').val());
-
-            // TODO: just showing first 10
-            $.each(tiles, function(i, entry) {
-                var acquisitionDate = new Date(entry.acquisitionDate);
-                if (acquisitionDate >= startDate &&
-                    acquisitionDate <= endDate) {
-                    displayTile(entry);
-                    ++viewCount;
-                }
-                if (viewCount === 10) {
-                    lastIndex = i;
-                    return false;
-                }
-            });
+            var viewCount = displayTiles(tiles);
+            if (viewCount === 0) {
+                $('#available-tiles').text('No tiles available');
+            }
         }).fail(function(err) {
-            console.log(err);
+            console.error(err);
             $('#alert-text').text('Currently unable to view tiles');
             $('#alert').show();
         });
     };
+
+    // view more tiles
+    $('#available-tiles-more-btn').on('click', function() {
+        displayTiles();
+    });
 
     $('#navbar-side').addClass('reveal');
     $('#navbar-open-btn').on('click', function() {

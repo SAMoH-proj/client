@@ -186,6 +186,9 @@ html, body, #cesiumContainer {
     height: 0;
 }
 
+#available-tiles-more-btn{
+    display: none;
+}
 
 /************** image popup *****************/
 #view-image-popup{
