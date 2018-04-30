@@ -55,9 +55,8 @@ define(function(require) {
 
             if (mapSelectType === 'tiles') {
                 displayAvailableTiles(lon, lat);
-                return;
             }
-            else if (mapSelectType === 'transect'){
+            else if (mapSelectType === 'transect') {
                 drawLine(cartesian, lon, lat);
 
                 if (entities.getById('transect')) {
@@ -74,11 +73,10 @@ define(function(require) {
 
                 viewer.scene.requestRender();
             }
-
         }, Cesium.ScreenSpaceEventType.LEFT_CLICK
     );
 
-    /*****************  rectangle   ****************/
+    /** ***************  rectangle   ****************/
     var screenSpaceEventHandler = new Cesium.ScreenSpaceEventHandler(
         viewer.scene.canvas);
     var mouseDown = false;
@@ -130,7 +128,7 @@ define(function(require) {
     );
 
     screenSpaceEventHandler.setInputAction(
-        function startClickShift(){
+        function startClickShift() {
             mouseDown = true;
             selector.rectangle.coordinates = getSelectorLocation;
         },
@@ -173,7 +171,7 @@ define(function(require) {
     };
 
     var displayAvailableTiles = function(lon, lat) {
-        $.each(layers, function(i, layer){
+        $.each(layers, function(i, layer) {
             scene.imageryLayers.remove(layer);
         });
         $.event.trigger(
@@ -196,13 +194,13 @@ define(function(require) {
                 extents.east,
                 extents.north
             )
-        })
+        });
         layers[id] = scene.imageryLayers.addImageryProvider(provider);
     };
 
-    var drawLine = function(cartesian, lon, lat){
-        if(!entities.getById('transect')){
-            if(!entities.getById('start-line')){
+    var drawLine = function(cartesian, lon, lat) {
+        if (!entities.getById('transect')) {
+            if (!entities.getById('start-line')) {
                 // no points founds found create starting position
                 entities.add({
                     id: 'start-line',
@@ -213,7 +211,7 @@ define(function(require) {
                     }
                 });
             }
-            else{
+            else {
                 // create end position
                 entities.add({
                     id: 'end-line',
@@ -265,7 +263,7 @@ define(function(require) {
 
     var removeOverlay = function(id) {
         scene.imageryLayers.remove(layers[id]);
-        delete layers[id]
+        delete layers[id];
     };
 
     var highlightLine = function() {
@@ -280,10 +278,10 @@ define(function(require) {
 
     var isLineHighlighted = function() {
         var start = entities.getById('start-line');
-        if(start && start.point.outlineWidth > 0){
+        if (start && start.point.outlineWidth > 0) {
             return true;
         }
-        else{
+        else {
             return false;
         }
     };
@@ -302,25 +300,25 @@ define(function(require) {
 
         clearMap: clearMap,
         displayOverlay: displayOverlay,
-        getTransectExtents(){
+        getTransectExtents() {
             var extents = entities.getById('transect').polyline.positions.getValue();
             var start = Cesium.Cartographic.fromCartesian(extents[0]);
             var end = Cesium.Cartographic.fromCartesian(extents[1]);
-            return{
+            return {
                 xmin: Cesium.Math.toDegrees(start.longitude),
                 ymin: Cesium.Math.toDegrees(start.latitude),
                 xmax: Cesium.Math.toDegrees(end.longitude),
-                ymax: Cesium.Math.toDegrees(end.latitude),
-            }
+                ymax: Cesium.Math.toDegrees(end.latitude)
+            };
         },
-        getTimeSeriesExtents(){
+        getTimeSeriesExtents() {
             var rect = entities.getById('rectangle').rectangle.coordinates.getValue();
-            return{
+            return {
                 xmin: Cesium.Math.toDegrees(rect.west),
                 xmax: Cesium.Math.toDegrees(rect.east),
                 ymin: Cesium.Math.toDegrees(rect.south),
                 ymax: Cesium.Math.toDegrees(rect.north)
-            }
+            };
         },
         removeOverlay: removeOverlay,
         setSelectType: function(type) {

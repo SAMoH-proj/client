@@ -7,14 +7,99 @@ define(function(require) {
     // current point for fetching tiles
     var currentPoint;
 
+    // current list of tiles
+    var tiles;
+
+    // index of last tile displayed
+    var lastIndex;
+
+    /**
+     * Display a single satellite thumbnail tile and metadata for selected point.
+     * @param entry The tile metadata object.
+     */
+    var displayTile = function(entry) {
+        var url = entry.download_url;
+        var imagePath = url.substr(0, url.lastIndexOf('/'));
+        var productId = url.split('/')[8];
+        var sThumb = imagePath + '/' + productId + '_thumb_small.jpg';
+        var lThumb = imagePath + '/' + productId + '_thumb_large.jpg';
+
+        $('#available-tiles').append(`
+          <div class="thumb loader"
+               data-field-id="${entry.entityId}"
+               data-field-large-thumb="${lThumb}"
+               data-field-e="${entry.max_lon}"
+               data-field-w="${entry.min_lon}"
+               data-field-n="${entry.max_lat}"
+               data-field-s="${entry.min_lat}">
+            <img src="${sThumb}"></img>
+            <div class="thumb-meta">
+              <div title="Show/Hide image metadata"
+                   class="thumb-meta-more">more</div>
+              <table class="table">
+                <tbody>
+                  <tr>
+                    <th>Acquisition Date</th>
+                    <th>${entry.acquisitionDate}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Cloud Cover</th>
+                    <th>${entry.cloudCover}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Entity ID</th>
+                    <th>${entry.entityId}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Epoch</th>
+                    <th>${entry.epoch}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Minimum Latitude</th>
+                    <th>${entry.min_lat}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Minimum Longitude</th>
+                    <th>${entry.min_lon}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Maximum Latitude</th>
+                    <th>${entry.max_lat}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Maximum Longitude</th>
+                    <th>${entry.max_lon}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Processing Level</th>
+                    <th>${entry.processingLevel}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Product ID</th>
+                    <th>${entry.productId}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Path</th>
+                    <th>${entry.path}</th>
+                  </tr>
+                  <tr class="collapsible">
+                    <th>Row</th>
+                    <th>${entry.row}</th>
+                  </tr>
+                </tbody>
+              </table>
+            </div>`
+        );
+    };
+
     /**
      * Fetch satellite thumbnail tiles and metadata for selected point.
      * @param point User selected latlon.
      */
-    var fetchTiles = function(point){
+    var fetchTiles = function(point) {
         $('#available-tiles').empty();
 
-        if(point === undefined){
+        if (point === undefined) {
             return;
         }
 
@@ -22,81 +107,24 @@ define(function(require) {
         $.getJSON(config.backend_url + '/' + sat, {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
+            tiles = data.msg;
+            var viewCount = 0;
+
+            var startDate = new Date($('#filter-start').val());
+            var endDate = new Date($('#filter-end').val());
+
             // TODO: just showing first 10
-            $.each(data.msg.slice(0, 10), function(i, entry) {
-                var index = entry.download_url;
-                var imagePath = index.substr(0, index.lastIndexOf('/'));
-                var productId = index.split('/')[8];
-                var sThumb = imagePath + '/' + productId + '_thumb_small.jpg';
-                var lThumb = imagePath + '/' + productId + '_thumb_large.jpg';
-
-                $('#available-tiles').append(`
-                      <div class="thumb loader"
-                         data-field-id="${entry.entityId}"
-                         data-field-large-thumb="${lThumb}"
-                         data-field-e="${entry.max_lon}"
-                         data-field-w="${entry.min_lon}"
-                         data-field-n="${entry.max_lat}"
-                         data-field-s="${entry.min_lat}">
-                      <img src="${sThumb}"></img>
-
-                    <div class="thumb-meta">
-                      <div title="Show/Hide image metadata"
-                         class="thumb-meta-more">more</div>
-                      <table class="table">
-                        <tbody>
-                          <tr>
-                            <th>Acquisition Date</th>
-                            <th>${entry.acquisitionDate}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Cloud Cover</th>
-                            <th>${entry.cloudCover}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Entity ID</th>
-                            <th>${entry.entityId}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Epoch</th>
-                            <th>${entry.epoch}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Minimum Latitude</th>
-                            <th>${entry.min_lat}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Minimum Longitude</th>
-                            <th>${entry.min_lon}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Maximum Latitude</th>
-                            <th>${entry.max_lat}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Maximum Longitude</th>
-                            <th>${entry.max_lon}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Processing Level</th>
-                            <th>${entry.processingLevel}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Product ID</th>
-                            <th>${entry.productId}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Path</th>
-                            <th>${entry.path}</th>
-                          </tr>
-                          <tr class="collapsible">
-                            <th>Row</th>
-                            <th>${entry.row}</th>
-                          </tr>
-                        </tbody>
-                      </table>
-                    </div>`
-                );
+            $.each(tiles, function(i, entry) {
+                var acquisitionDate = new Date(entry.acquisitionDate);
+                if (acquisitionDate >= startDate &&
+                    acquisitionDate <= endDate) {
+                    displayTile(entry);
+                    ++viewCount;
+                }
+                if (viewCount === 10) {
+                    lastIndex = i;
+                    return false;
+                }
             });
         }).fail(function(err) {
             console.log(err);
@@ -114,29 +142,35 @@ define(function(require) {
         $('#navbar-side').removeClass('reveal');
     });
 
-    $("#function-selector a").click(function(e){
+    $('#function-selector a').click(function(e) {
         $('#draw-details').hide();
         $('#function-selector a').removeClass('active');
+
         var id = $(e.target).attr('id') || $(e.target).parent().attr('id');
         map.setSelectType(id.split('-')[1]);
         map.clearMap();
+
         $('#' + id).addClass('active');
         $('#function-selector button img').attr(
             'src', $('#' + id + ' img').attr('src')
         );
-
         var html = '<img src="' + $('#' + id + ' img').attr('src') + '" height="20px" width="20px"/>' + $('#' + id).text().trim();
-
         $('#function-selector button').html(html);
+
+        // hide filters when find tiles not selected
+        if (id === 'fetch-tiles') {
+            $('#satellite-selector-filter').show();
+        }
+        else {
+            $('#satellite-selector-filter').hide();
+        }
     });
 
-    $("#satellite-selector a").click(function(e){
+    $('#satellite-selector a').click(function(e) {
         $('#satellite-selector a').removeClass('active');
-        //var id = $(e.target);
         $(e.target).addClass('active');
         fetchTiles(currentPoint);
     });
-
 
     $(document).on(map.EVT_DELETE_LINE, function() {
         $('#draw-details').hide();
@@ -160,12 +194,12 @@ define(function(require) {
 
     $(document).on('click', '.thumb img', function() {
         var div = $(this).parent();
-        if(div.hasClass('selected')){
+        if (div.hasClass('selected')) {
             // delete overlay using entity id
             map.removeOverlay(div.attr('data-field-id'));
             div.removeClass('selected');
         }
-        else{
+        else {
             div.addClass('selected');
             map.displayOverlay(
                 div.attr('data-field-id'),
@@ -196,19 +230,18 @@ define(function(require) {
         $('#draw-details').hide();
     });
 
-
     $('#create-image-btn').on('click', function() {
         var selection = 'line';
         var type = 'ndvi_transect';
         var extents;
 
-        $("#view-image").attr('src', '');
+        $('#view-image').attr('src', '');
 
         var id = $('#function-selector a[class*="active"]').attr('id');
-        if(id === 'ndvi-transect'){
+        if (id === 'ndvi-transect') {
             extents = map.getTransectExtents();
         }
-        else if(id.endsWith('rectangle')){
+        else if (id.endsWith('rectangle')) {
             selection = 'rectangle';
             type = $('#function-selector a[class*="active"]').attr('data-field-type');
             extents = map.getTimeSeriesExtents();
@@ -220,7 +253,15 @@ define(function(require) {
             '&xmax=' + extents.xmax +
             '&ymin=' + extents.ymin +
             '&ymax=' + extents.ymax;
-        $("#view-image").attr('src', url);
-        $('#view-image-popup').modal({})
+        $('#view-image').attr('src', url);
+        $('#view-image-popup').modal({});
     });
+
+    // set default fetch tile date filter one year from today
+    var today = new Date();
+    var year = today.getFullYear();
+    var mon = ('0' + (today.getMonth() + 1)).slice(-2);
+    var day = ('0' + today.getDate()).slice(-2);
+    $('#filter-start').val(year - 1 + '-' + mon + '-' + day);
+    $('#filter-end').val(year + '-' + mon + '-' + day);
 });

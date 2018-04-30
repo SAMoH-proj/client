@@ -138,6 +138,10 @@ html, body, #cesiumContainer {
     margin-bottom: 0.3em;
 }
 
+#satellite-selector-filter{
+    padding: 0 0 0.2em 0.2em;
+}
+
 #available-tiles{
     color: white;
 }
