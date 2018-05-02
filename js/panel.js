@@ -153,7 +153,6 @@ define(function(require) {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
             tiles = data.msg;
-            console.log(tiles);
             var viewCount = displayTiles(sat);
             if (viewCount === 0) {
                 $('#available-tiles').text('No tiles available');
@@ -164,6 +163,8 @@ define(function(require) {
             $('#alert').show();
         });
     };
+
+    /** ***************  events   ****************/
 
     // view more tiles
     $('#available-tiles-more-btn').on('click', function() {
@@ -212,6 +213,10 @@ define(function(require) {
     });
 
     $(document).on(map.EVT_DELETE_LINE, function() {
+        $('#draw-details').hide();
+    });
+
+    $(document).on(map.EVT_DELETE_RECT, function() {
         $('#draw-details').hide();
     });
 
