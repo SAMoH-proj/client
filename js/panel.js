@@ -175,8 +175,8 @@ define(function(require) {
      * Update create button with details of selected operation.
      */
     var updateOperationDetails = function() {
-        var description = $('#function-selector a[class*="active"]').attr('data-field-description');
-        $('#create-image-btn').text('Create ' + description);
+        $('#create-image-btn').text(
+            'Create ' + $('#function-selector a[class*="active"]').text().trim());
         $('#draw-details').show();
     };
 
