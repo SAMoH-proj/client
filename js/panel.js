@@ -169,7 +169,7 @@ define(function(require) {
      */
     var getProduct = function() {
         return $('#satellite-selector a.active').attr('data-field-name');
-    }
+    };
 
     /** ***************  events   ****************/
 
@@ -202,14 +202,6 @@ define(function(require) {
         );
         var html = '<img src="' + $('#' + id + ' img').attr('src') + '" height="20px" width="20px"/>' + $('#' + id).text().trim();
         $('#function-selector button').html(html);
-
-        // hide filters when find tiles not selected
-        if (id === 'fetch-tiles') {
-            $('#satellite-selector-filter').show();
-        }
-        else {
-            $('#satellite-selector-filter').hide();
-        }
     });
 
     $('#satellite-selector a').click(function(e) {
@@ -288,18 +280,21 @@ define(function(require) {
 
         $('#view-image').attr('src', '');
 
-        var id = $('#function-selector a[class*="active"]').attr('id');
+        var active = $('#function-selector a[class*="active"]');
+        var id = active.attr('id');
         if (id === 'ndvi-transect') {
             extents = map.getTransectExtents();
         }
         else if (id.endsWith('rectangle')) {
             selection = 'rectangle';
-            type = $('#function-selector a[class*="active"]').attr('data-field-type');
+            type = active.attr('data-field-type');
             extents = map.getTimeSeriesExtents();
         }
 
         var url = config.backend_url + '/datacube?selection=' + selection +
             '&product=' + getProduct() +
+            '&time_begin=' + $('#filter-start').val() +
+            '&time_end=' + $('#filter-end').val() +
             '&type=' + type +
             '&xmin=' + extents.xmin +
             '&xmax=' + extents.xmax +
