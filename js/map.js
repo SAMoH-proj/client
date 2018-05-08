@@ -175,6 +175,24 @@ define(function(require) {
     };
 
     /**
+     * Remove the transect line from map.
+     */
+    var removeLine = function() {
+        entities.remove(entities.getById('transect'));
+        entities.remove(entities.getById('start-line'));
+        entities.remove(entities.getById('end-line'));
+        viewer.scene.requestRender();
+    };
+
+    /**
+     * Remove(hide) the rectangle line from map.
+     */
+    var removeRect = function() {
+        selector.show = false;
+        viewer.scene.requestRender();
+    };
+
+    /**
      * @return True if the transect is currently highlighted.
      */
     var isLineHighlighted = function() {
@@ -192,7 +210,7 @@ define(function(require) {
      */
     var isRectHighlighted = function() {
         var rect = entities.getById('rectangle');
-        if (rect && rect.rectangle.outline) {
+        if (rect && selector.show && rect.rectangle.outline.getValue()) {
             return true;
         }
         else {
@@ -212,30 +230,38 @@ define(function(require) {
                 Cesium.Math.toDegrees(cartographic.longitude),
                 Cesium.Math.toDegrees(cartographic.latitude));
         }
-        else if (mapSelectType === 'transect') {
-            drawLine(cartesian);
+        else {
+            if (mapSelectType === 'transect') {
+                drawLine(cartesian);
+            }
 
-            if (entities.getById('transect')) {
-                var pickedObject = scene.pick(click.position);
-                if (pickedObject) {
-                    entities.getById('start-line').point.outlineWidth = 2;
-                    entities.getById('end-line').point.outlineWidth = 2;
+            var pickedObject = scene.pick(click.position);
+            var startLine = entities.getById('start-line');
+            var endLine = entities.getById('end-line');
+            var rectangle = entities.getById('rectangle');
+
+            if(pickedObject){
+                if (pickedObject.id.id === 'transect') {
+                    startLine.point.outlineWidth = 2;
+                    endLine.point.outlineWidth = 2;
                 }
                 else {
-                    entities.getById('start-line').point.outlineWidth = 0;
-                    entities.getById('end-line').point.outlineWidth = 0;
+                    rectangle.rectangle.outline = true;
+                }
+            }
+            else {
+                if(startLine){
+                    startLine.point.outlineWidth = 0;
+                }
+                if(endLine){
+                    endLine.point.outlineWidth = 0;
+                }
+                if(rectangle){
+                    rectangle.rectangle.outline = false;
                 }
             }
 
             viewer.scene.requestRender();
-        }
-        else if (mapSelectType === 'rectangle') {
-            var rect = entities.getById('rectangle');
-            if (rect) {
-                rect.rectangle.outline =
-                    scene.pick(click.position) !== undefined;
-                viewer.scene.requestRender();
-            }
         }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
 
@@ -322,14 +348,16 @@ define(function(require) {
 
     $(document).on('keydown', function(e) {
         var code = e.keyCode || e.which;
-        if (code === 46 && isLineHighlighted()) {
-            clearMap();
-            $.event.trigger({type: EVT_DELETE_LINE});
-        }
-        else if (code === 46 && isRectHighlighted()) {
-            entities.getById('rectangle').rectangle.outline = false;
-            clearMap();
-            $.event.trigger({type: EVT_DELETE_RECT});
+        if (code === 46) {
+            if (isLineHighlighted()) {
+                removeLine();
+                $.event.trigger({type: EVT_DELETE_LINE});
+            }
+            if (isRectHighlighted()) {
+                entities.getById('rectangle').rectangle.outline = false;
+                removeRect();
+                $.event.trigger({type: EVT_DELETE_RECT});
+            }
         }
     });
 
@@ -361,6 +389,13 @@ define(function(require) {
         },
 
         /**
+         * @return type transect, rectangle or tiles
+         */
+        getSelectType: function(type) {
+            return mapSelectType;
+        },
+
+        /**
          * @return xmin,ymin,xmax,ymax of current rectangle
          */
         getTimeSeriesExtents() {
@@ -372,6 +407,25 @@ define(function(require) {
                 ymax: Cesium.Math.toDegrees(rect.north)
             };
         },
+
+        /**
+         * @return Is the line currently displayed on map?
+         */
+        isLineVisible(){
+            return entities.getById('transect') !== undefined;
+        },
+
+        /**
+         * @return Is the rectangle currently displayed on map?
+         */
+        isRectVisible(){
+            return selector.show;
+        },
+
+        /**
+         * Delete overlay from map based on id.
+         * @param id
+         */
         removeOverlay: removeOverlay,
 
         /**

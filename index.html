@@ -58,7 +58,14 @@
               Fetch Tiles
             </button>
             <div class="dropdown-menu">
-              <a id="ndvi-transect" class="dropdown-item" href="#">
+              <a id="fetch-tiles" class="dropdown-item active" href="#">
+                <img src="img/map-9.svg" height="20px" width="20px"/>
+                Fetch Tiles
+              </a>
+              <a id="ndvi-transect"
+                 class="dropdown-item"
+                 data-field-description="NDVI Transect"
+                 href="#">
                 <img src="img/vector-path-line.svg" height="20px" width="20px"/>
                 NDVI Transect
               </a>
@@ -70,14 +77,6 @@
                 <img src="img/vector-path-square.svg" height="20px" width="20px"/>
                 NDVI Time Series
               </a>
-              <a id="ts-rectangle"
-                 class="dropdown-item"
-                 data-field-type="time_series"
-                 data-field-description="Time Series"
-                 href="#">
-                <img src="img/vector-path-square.svg" height="20px" width="20px"/>
-                Time Series
-              </a>
               <a id="std-rectangle"
                  class="dropdown-item"
                  data-field-type="ndvi_std_dev"
@@ -86,9 +85,13 @@
                 <img src="img/vector-path-square.svg" height="20px" width="20px"/>
                 NDVI STD Dev
               </a>
-              <a id="fetch-tiles" class="dropdown-item active" href="#">
-                <img src="img/map-9.svg" height="20px" width="20px"/>
-                Fetch Tiles
+              <a id="ts-rectangle"
+                 class="dropdown-item"
+                 data-field-type="time_series"
+                 data-field-description="Time Series"
+                 href="#">
+                <img src="img/vector-path-square.svg" height="20px" width="20px"/>
+                Time Series
               </a>
             </div>
           </div>

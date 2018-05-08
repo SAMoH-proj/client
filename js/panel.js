@@ -171,6 +171,15 @@ define(function(require) {
         return $('#satellite-selector a.active').attr('data-field-name');
     };
 
+    /**
+     * Update create button with details of selected operation.
+     */
+    var updateOperationDetails = function() {
+        var description = $('#function-selector a[class*="active"]').attr('data-field-description');
+        $('#create-image-btn').text('Create ' + description);
+        $('#draw-details').show();
+    };
+
     /** ***************  events   ****************/
 
     // view more tiles
@@ -189,19 +198,27 @@ define(function(require) {
     });
 
     $('#function-selector a').click(function(e) {
-        $('#draw-details').hide();
-        $('#function-selector a').removeClass('active');
-
         var id = $(e.target).attr('id') || $(e.target).parent().attr('id');
-        map.setSelectType(id.split('-')[1]);
-        map.clearMap();
+        var currentSelectionType = id.split('-')[1];
 
+        map.setSelectType(currentSelectionType);
+
+        $('#function-selector a').removeClass('active');
         $('#' + id).addClass('active');
         $('#function-selector button img').attr(
             'src', $('#' + id + ' img').attr('src')
         );
         var html = '<img src="' + $('#' + id + ' img').attr('src') + '" height="20px" width="20px"/>' + $('#' + id).text().trim();
         $('#function-selector button').html(html);
+
+        if((currentSelectionType === 'transect' && map.isLineVisible()) ||
+           (currentSelectionType === 'rectangle' && map.isRectVisible())){
+            // update the operation button if shape visible
+            updateOperationDetails();
+        }
+        else{
+            $('#draw-details').hide();
+        }
     });
 
     $('#satellite-selector a').click(function(e) {
@@ -212,22 +229,23 @@ define(function(require) {
     });
 
     $(document).on(map.EVT_DELETE_LINE, function() {
-        $('#draw-details').hide();
+        if ($('#function-selector a[class*="active"]').attr('id') === 'ndvi-transect') {
+            $('#draw-details').hide();
+        }
     });
 
     $(document).on(map.EVT_DELETE_RECT, function() {
-        $('#draw-details').hide();
+        if ($('#function-selector a[class*="active"]').attr('id').endsWith('rectangle')) {
+            $('#draw-details').hide();
+        }
     });
 
     $(document).on(map.EVT_LINE_ADDED, function(e, line) {
-        $('#draw-details').show();
-        $('#create-image-btn').text('Create NDVI Transect');
+        updateOperationDetails();
     });
 
     $(document).on(map.EVT_RECT_ADDED, function(e) {
-        $('#draw-details').show();
-        var description = $('#function-selector a[class*="active"]').attr('data-field-description');
-        $('#create-image-btn').text('Create ' + description);
+        updateOperationDetails();
     });
 
     $(document).on(map.EVT_MAP_CLICK, function(e, point) {
