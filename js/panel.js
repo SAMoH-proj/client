@@ -148,7 +148,7 @@ define(function(require) {
             return;
         }
 
-        var sat = $('#satellite-selector a.active').attr('data-field-name');
+        var sat = getProduct();
         $.getJSON(config.backend_url + '/' + sat, {
             lon: point.lon, lat: point.lat
         }).done(function(data) {
@@ -163,6 +163,13 @@ define(function(require) {
             $('#alert').show();
         });
     };
+
+    /**
+     * @return The current selected satellite.
+     */
+    var getProduct = function() {
+        return $('#satellite-selector a.active').attr('data-field-name');
+    }
 
     /** ***************  events   ****************/
 
@@ -292,6 +299,7 @@ define(function(require) {
         }
 
         var url = config.backend_url + '/datacube?selection=' + selection +
+            '&product=' + getProduct() +
             '&type=' + type +
             '&xmin=' + extents.xmin +
             '&xmax=' + extents.xmax +
