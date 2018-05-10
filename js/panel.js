@@ -142,11 +142,15 @@ define(function(require) {
      */
     var fetchTiles = function(point) {
         lastIndex = 0;
-        $('#available-tiles').empty();
 
         if (point === undefined) {
             return;
         }
+        $('#satellite-selector a[class*="active"] > .fa-spinner').show();
+        document.body.style.cursor = "wait";
+        $('#available-tiles-more-btn').hide();
+        $('#available-tiles').empty();
+
 
         var sat = getProduct();
         $.getJSON(config.backend_url + '/' + sat, {
@@ -161,6 +165,9 @@ define(function(require) {
             console.error(err);
             $('#alert-text').text('Currently unable to view tiles');
             $('#alert').show();
+        }).always(function() {
+            document.body.style.cursor = "default";
+            $('#satellite-selector a[class*="active"] > .fa-spinner').hide();
         });
     };
 
@@ -222,7 +229,6 @@ define(function(require) {
     });
 
     $('#satellite-selector a').click(function(e) {
-        $('#available-tiles-more-btn').hide();
         $('#satellite-selector a').removeClass('active');
         $(e.target).addClass('active');
         fetchTiles(currentPoint);

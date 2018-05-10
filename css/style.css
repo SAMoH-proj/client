@@ -142,6 +142,11 @@ html, body, #cesiumContainer {
     padding: 0 0 0.2em 0.2em;
 }
 
+#satellite-selector .fa-spinner{
+    display: none;
+    margin-right: 0.2em;
+}
+
 #available-tiles{
     color: white;
 }
