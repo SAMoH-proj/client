@@ -147,10 +147,9 @@ define(function(require) {
             return;
         }
         $('#satellite-selector a[class*="active"] > .fa-spinner').show();
-        document.body.style.cursor = "wait";
+        document.body.style.cursor = 'wait';
         $('#available-tiles-more-btn').hide();
         $('#available-tiles').empty();
-
 
         var sat = getProduct();
         $.getJSON(config.backend_url + '/' + sat, {
@@ -166,7 +165,7 @@ define(function(require) {
             $('#alert-text').text('Currently unable to view tiles');
             $('#alert').show();
         }).always(function() {
-            document.body.style.cursor = "default";
+            document.body.style.cursor = 'default';
             $('#satellite-selector a[class*="active"] > .fa-spinner').hide();
         });
     };
@@ -218,12 +217,12 @@ define(function(require) {
         var html = '<img src="' + $('#' + id + ' img').attr('src') + '" height="20px" width="20px"/>' + $('#' + id).text().trim();
         $('#function-selector button').html(html);
 
-        if((currentSelectionType === 'transect' && map.isLineVisible()) ||
-           (currentSelectionType === 'rectangle' && map.isRectVisible())){
+        if ((currentSelectionType === 'transect' && map.isLineVisible()) ||
+           (currentSelectionType === 'rectangle' && map.isRectVisible())) {
             // update the operation button if shape visible
             updateOperationDetails();
         }
-        else{
+        else {
             $('#draw-details').hide();
         }
     });
@@ -319,11 +318,18 @@ define(function(require) {
             '&product=' + getProduct() +
             '&time_begin=' + $('#filter-start').val() +
             '&time_end=' + $('#filter-end').val() +
-            '&type=' + type +
-            '&xmin=' + extents.xmin +
-            '&xmax=' + extents.xmax +
-            '&ymin=' + extents.ymin +
-            '&ymax=' + extents.ymax;
+            '&type=' + type;
+
+        if (extents.hasOwnProperty('xmin')) {
+            url += '&xmin=' + extents.xmin +
+                '&xmax=' + extents.xmax +
+                '&ymin=' + extents.ymin +
+                '&ymax=' + extents.ymax;
+        }
+        else {
+            url += '&geometry=' + encodeURIComponent(extents);
+        }
+
         $('#view-image').attr('src', url);
         $('#view-image-popup').modal({});
     });

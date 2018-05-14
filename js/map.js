@@ -50,11 +50,8 @@ define(function(require) {
      * Clear map of entities.
      */
     var clearMap = function() {
-        entities.remove(entities.getById('transect'));
-        entities.remove(entities.getById('start-line'));
-        entities.remove(entities.getById('end-line'));
-        selector.show = false;
-        viewer.scene.requestRender();
+        removeLine();
+        removeRect();
     };
 
     /**
@@ -103,32 +100,23 @@ define(function(require) {
      * @param cartesian Cesium position object.
      */
     var drawLine = function(cartesian) {
-        if (!entities.getById('transect')) {
-            if (!entities.getById('start-line')) {
-                // no points founds found create starting position
-                entities.add({
-                    id: 'start-line',
-                    position: cartesian,
-                    point: {
-                        color: Cesium.Color.WHITE,
-                        pixelSize: 5
-                    }
-                });
-            }
-            else {
-                // create end position
-                entities.add({
-                    id: 'end-line',
-                    position: cartesian,
-                    point: {
-                        color: Cesium.Color.WHITE,
-                        pixelSize: 5,
-                        outlineWidth: 0
-                    }
-                });
+        var line = entities.getById('transect');
+        if (!line) {
+            // no line currently exists
+            var points = getPointsInTransect();
+            entities.add({
+                id: 'line-' + (points.length + 1),
+                position: cartesian,
+                point: {
+                    color: Cesium.Color.WHITE,
+                    pixelSize: 5
+                }
+            });
 
+            if (points.length === 1) {
+                // create line if this is 2nd point
                 var positions = [
-                    entities.getById('start-line').position.getValue(),
+                    entities.getById('line-1').position.getValue(),
                     cartesian
                 ];
 
@@ -143,26 +131,45 @@ define(function(require) {
                     }
                 });
 
-                var start = scene.globe.ellipsoid.cartesianToCartographic(positions[0]);
-                var slon = Cesium.Math.toDegrees(start.longitude).toFixed(2);
-                var slat = Cesium.Math.toDegrees(start.latitude).toFixed(2);
-                var end = scene.globe.ellipsoid.cartesianToCartographic(positions[1]);
-                var elon = Cesium.Math.toDegrees(end.longitude).toFixed(2);
-                var elat = Cesium.Math.toDegrees(end.latitude).toFixed(2);
-
-                $.event.trigger(
-                    {
-                        type: EVT_LINE_ADDED
-                    },
-                    {
-                        start_lon: slon,
-                        start_lat: slat,
-                        end_lon: elon,
-                        end_lat: elat
-                    }
-                );
+                $.event.trigger({type: EVT_LINE_ADDED});
             }
         }
+        else {
+            // append next point to line
+            var linePositions = line.polyline.positions.getValue();
+            linePositions.push(cartesian);
+            line.polyline.positions = linePositions;
+
+            entities.add({
+                id: 'line-' + linePositions.length,
+                position: cartesian,
+                point: {
+                    color: Cesium.Color.WHITE,
+                    pixelSize: 5,
+                    outlineWidth: 0
+                }
+            });
+
+            viewer.scene.requestRender();
+        }
+    };
+
+    /**
+     * @return Array of Points in current transect.
+     */
+    var getPointsInTransect = function() {
+        var points = [];
+        for (var i = 1; i < 100; i++) {
+            var point = entities.getById('line-' + i);
+            if (point) {
+                points.push(point);
+            }
+            else {
+                break;
+            }
+        }
+
+        return points;
     };
 
     /**
@@ -179,8 +186,10 @@ define(function(require) {
      */
     var removeLine = function() {
         entities.remove(entities.getById('transect'));
-        entities.remove(entities.getById('start-line'));
-        entities.remove(entities.getById('end-line'));
+        $.each(getPointsInTransect(), function(i, point) {
+            entities.remove(point);
+        });
+
         viewer.scene.requestRender();
     };
 
@@ -196,7 +205,7 @@ define(function(require) {
      * @return True if the transect is currently highlighted.
      */
     var isLineHighlighted = function() {
-        var start = entities.getById('start-line');
+        var start = entities.getById('line-1');
         if (start && start.point.outlineWidth > 0) {
             return true;
         }
@@ -234,33 +243,30 @@ define(function(require) {
             if (mapSelectType === 'transect') {
                 drawLine(cartesian);
             }
+            else {
+                var pickedObject = scene.pick(click.position);
+                var rectangle = entities.getById('rectangle');
 
-            var pickedObject = scene.pick(click.position);
-            var startLine = entities.getById('start-line');
-            var endLine = entities.getById('end-line');
-            var rectangle = entities.getById('rectangle');
-
-            if(pickedObject){
-                if (pickedObject.id.id === 'transect') {
-                    startLine.point.outlineWidth = 2;
-                    endLine.point.outlineWidth = 2;
+                if (pickedObject) {
+                    if (pickedObject.id.id === 'transect') {
+                        $.each(getPointsInTransect(), function(i, point) {
+                            point.point.outlineWidth = 2;
+                        });
+                    }
+                    else {
+                        rectangle.rectangle.outline = true;
+                    }
                 }
                 else {
-                    rectangle.rectangle.outline = true;
-                }
-            }
-            else {
-                if(startLine){
-                    startLine.point.outlineWidth = 0;
-                }
-                if(endLine){
-                    endLine.point.outlineWidth = 0;
-                }
-                if(rectangle){
-                    rectangle.rectangle.outline = false;
-                }
-            }
+                    $.each(getPointsInTransect(), function(i, point) {
+                        point.point.outlineWidth = 0;
+                    });
 
+                    if (rectangle) {
+                        rectangle.rectangle.outline = false;
+                    }
+                }
+            }
             viewer.scene.requestRender();
         }
     }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -374,18 +380,35 @@ define(function(require) {
         displayOverlay: displayOverlay,
 
         /**
-         * @return xmin,ymin,xmax,ymax of current transect
+         * Get extents of current transect.
+         * @return xmin,ymin,xmax,ymax if simple line with 2 points, else return
+         * WKT linestriong.
          */
         getTransectExtents() {
             var extents = entities.getById('transect').polyline.positions.getValue();
-            var start = Cesium.Cartographic.fromCartesian(extents[0]);
-            var end = Cesium.Cartographic.fromCartesian(extents[1]);
-            return {
-                xmin: Cesium.Math.toDegrees(start.longitude),
-                ymin: Cesium.Math.toDegrees(start.latitude),
-                xmax: Cesium.Math.toDegrees(end.longitude),
-                ymax: Cesium.Math.toDegrees(end.latitude)
-            };
+            if (extents.length === 2) {
+                var start = Cesium.Cartographic.fromCartesian(extents[0]);
+                var end = Cesium.Cartographic.fromCartesian(extents[1]);
+                return {
+                    xmin: Cesium.Math.toDegrees(start.longitude),
+                    ymin: Cesium.Math.toDegrees(start.latitude),
+                    xmax: Cesium.Math.toDegrees(end.longitude),
+                    ymax: Cesium.Math.toDegrees(end.latitude)
+                };
+            }
+            else {
+                var text = 'LINESTRING(';
+                for (var i = 0; i < extents.length; i++) {
+                    if (i > 0) {
+                        text += ',';
+                    }
+                    var point = Cesium.Cartographic.fromCartesian(extents[i]);
+                    text += Cesium.Math.toDegrees(point.longitude) + ' ' +
+                        Cesium.Math.toDegrees(point.latitude);
+                }
+
+                return text + ')';
+            }
         },
 
         /**
@@ -411,14 +434,14 @@ define(function(require) {
         /**
          * @return Is the line currently displayed on map?
          */
-        isLineVisible(){
+        isLineVisible() {
             return entities.getById('transect') !== undefined;
         },
 
         /**
          * @return Is the rectangle currently displayed on map?
          */
-        isRectVisible(){
+        isRectVisible() {
             return selector.show;
         },
 
