@@ -1,3 +1,5 @@
+// Copyright (C) 2018 Geo Smart Decisions
+
 'use strict';
 
 define(function(require) {
